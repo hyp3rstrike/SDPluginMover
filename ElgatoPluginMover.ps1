@@ -1,5 +1,5 @@
 # Set the filepath to the root folder of your Portable OBS folder.
-$dirToOBSPortableRoot = "" #Example: "D:\OBS-Studio" with no trailing backslash. It'll fuck the pathing below.
+$dirToOBSPortableRoot = "C:\OBS Studio" #Example: "D:\OBS-Studio" with no trailing backslash. It'll fuck the pathing below.
 
 #----- DO NOT MODIFY ANYTHING BELOW THIS LINE -------
 $dirToPluginBase = $env:ProgramData + "\obs-studio\plugins\StreamDeckPlugin\"
@@ -67,7 +67,7 @@ function CompareAndMove {
         }
     }
      else {
-        Copy-Item -Path $dirToPluginData\* -Destination $dirToObsData -Force
+        Copy-Item -Path $dirToPluginData\* -Destination $dirToObsData -Recurse -Force
         [System.Windows.MessageBox]::Show("$sdPluginDllQt6Fn files successfully copied to $dirToObsData", "$sdPluginDllQt6Fn Copied", $buttons, $icon)
     }
     if (Get-Item -Path $sdPluginDest){
@@ -75,7 +75,7 @@ function CompareAndMove {
             [System.Windows.MessageBox]::Show("$err4", "$sdPluginMainDll Move Not Required", $buttons, $icon)
         }
     } else {
-        Copy-Item -Path $dirToPluginBin\* -Destination $dirToObsBin -Force
+        Copy-Item -Path $dirToPluginBin\* -Destination $dirToObsBin -Recurse -Force
         [System.Windows.MessageBox]::Show("$sdPluginMainDll files successfully copied to $dirToObsBin", "$sdPluginMainDll Copied", $buttons, $icon)
     }
 }
