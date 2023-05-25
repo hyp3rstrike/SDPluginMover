@@ -71,28 +71,7 @@ function CompareAndMove {
     }
 }
 
-if (-not (Test-Path -Path $dirToObsBin)) {
-    New-Item -ItemType Directory -Path $dirToObsData | Out-Null
-}
-elseif (-not (Test-Path -Path $sdPluginQt6Source)) {
-    [System.Windows.MessageBox]::Show("Could not find $sdPluginDllQt6Fn in $sdPluginQt6Source.`r`n`r`n$checkSWInstall", "$sdPluginDllQt6Fn Source File Not Found", $buttons, $icon)
-    Break
-}
-else {
-
-    else {
-        
-    }
-}
-
-
-elseif (-not (Test-Path -Path $sdPluginQt6Source)) {
-    [System.Windows.MessageBox]::Show("Could not find $sdPluginMainDll in $sdPluginMainSource.`r`n`r`n$checkSWInstall", "$sdPluginMainDll Source File Not Found", $buttons, $icon)
-    Break
-}
-else {
-
-    else {
-      
-    }
-}
+InitDirCheck
+DestinationCheck
+SourceCheck
+CompareAndMove
