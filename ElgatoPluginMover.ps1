@@ -1,5 +1,5 @@
 # Set the filepath to the root folder of your Portable OBS folder.
-$dirToOBSPortableRoot = "D:\OBS-Studio" #Example: "D:\OBS-Studio" with no trailing backslash. It'll fuck the pathing below.
+$dirToOBSPortableRoot = "" #Example: "D:\OBS-Studio" with no trailing backslash. It'll fuck the pathing below.
 
 #----- DO NOT MODIFY ANYTHING BELOW THIS LINE -------
 $dirToPluginBase = $env:ProgramData + "\obs-studio\plugins\StreamDeckPlugin\"
@@ -11,11 +11,11 @@ $dirToObsData = $dirToOBSPortableRoot + "\data\obs-plugins\StreamDeckPlugin\"
 $sdPluginMainDll = "StreamDeckPlugin.dll"
 $sdPluginDllQt6Fn = "StreamDeckPluginQt6.dll"
 $sdPluginQt6Source = $dirToPluginData + $sdPluginDllQt6Fn 
-$sdPluginMainSource = $dirToPluginData + $sdPluginMainDll
-$sdPluginQt6Dest = $dirToPluginData + $sdPluginDllQt6Fn 
-$sdPluginDest = $dirToPluginData + $sdPluginMainDll
+$sdPluginMainSource = $dirToPluginBin + $sdPluginMainDll
+$sdPluginQt6Dest = $dirToObsData + $sdPluginDllQt6Fn 
+$sdPluginDest = $dirToObsBin + $sdPluginMainDll
 
-$checkSWInstall = "Please check that the Elgato StreamDeck software has been installed on your machine properly.`r`n`r`nYou may need to reinstall it."
+#$checkSWInstall = "Please check that the Elgato StreamDeck software has been installed on your machine properly.`r`n`r`nYou may need to reinstall it."
 
 $err1 = "You have not specified the location of your Portable OBS installation in this PowerShell Script.`r`n`r`nPlease refer to the Github page."
 $err2 = "Unable to locate the source files for the StreamDeck Plugin at`r`n`r`n$dirToPluginBase`r`n`r`nPlease check that you've installed the StreamDeck Application from Elgato's website on this machine."
@@ -43,7 +43,7 @@ function DestinationCheck {
       New-Item -ItemType Directory -Path $dirToObsData | Out-Null
   }
   if (-not (Test-Path -Path $dirToObsBin)) {
-      New-Item -ItemType Directory -Path $dirToObsData | Out-Null
+      New-Item -ItemType Directory -Path $dirToObsData| Out-Null
   }
 }
 
@@ -59,15 +59,24 @@ function SourceCheck {
 }
 
 function CompareAndMove {
-    if (-not (Get-Item $sdPluginQt6Dest).VersionInfo.FileVersion -lt $sdPluginQt6Source) {
-        [System.Windows.MessageBox]::Show($err3, "$sdPluginDllQt6Fn Move Not Required", $buttons, $icon)
-    } else {
-    Move-Item -Path $dirToPluginBin\* -Destination $dirToObsBin -Force
+    if (Get-Item -Path $sdPluginQt6Dest) {
+        $srcFileVer = [version](Get-Command $sdPluginQt6Source).Version
+        $destFileVer = [version](Get-Command $sdPluginQt6Dest).Version
+        if (-not $destFileVer -lt $srcFileVer) {
+            [System.Windows.MessageBox]::Show($err3, "$sdPluginDllQt6Fn Move Not Required", $buttons, $icon)
+        }
     }
-        if (-not (Get-Item $sdPluginDest).VersionInfo.FileVersion -lt $sdPluginMainSource) {
-        [System.Windows.MessageBox]::Show($err4, "$sdPluginMainDll Move Not Required", $buttons, $icon)
+     else {
+        Copy-Item -Path $dirToPluginData\* -Destination $dirToObsData -Force
+        [System.Windows.MessageBox]::Show("$sdPluginDllQt6Fn files successfully copied to $dirToObsData", "$sdPluginDllQt6Fn Copied", $buttons, $icon)
+    }
+    if (Get-Item -Path $sdPluginDest){
+        if (-not (Get-Item $sdPluginDest).VersionInfo.FileVersion -lt (Get-Item $sdPluginMainSource).VersionInfo.FileVersion) {
+            [System.Windows.MessageBox]::Show("$err4", "$sdPluginMainDll Move Not Required", $buttons, $icon)
+        }
     } else {
-      Move-Item -Path $dirToPluginData\* -Destination $dirToObsData -Force
+        Copy-Item -Path $dirToPluginBin\* -Destination $dirToObsBin -Force
+        [System.Windows.MessageBox]::Show("$sdPluginMainDll files successfully copied to $dirToObsBin", "$sdPluginMainDll Copied", $buttons, $icon)
     }
 }
 
