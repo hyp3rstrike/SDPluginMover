@@ -36,18 +36,18 @@ function InitDirCheck {
             exit
         }
     }
-    if ($dirToOBSPortableRoot -eq "") {
-        [System.Windows.MessageBox]::Show($err1, "OBS Portable Directory Not Set", $buttons, $icon)
-        exit
-    } else {
-        If (-not (Test-Path -Path $dirToOBSPortableRoot)) {
-            [System.Windows.MessageBox]::Show($err1, "Unable to find OBS Portable Directory", $buttons, $icon)
-            exit
-        }
-    }
 }
 
-function CheckSrcFilesExist {
+function DestinationCheck {
+  if (-not (Test-Path -Path $dirToObsData)) {
+      New-Item -ItemType Directory -Path $dirToObsData | Out-Null
+  }
+  if (-not (Test-Path -Path $dirToObsBin)) {
+      New-Item -ItemType Directory -Path $dirToObsData | Out-Null
+  }
+}
+
+function SourceCheck {
     if (-not (Test-Path -Path $dirToPluginBin)) {
         [System.Windows.MessageBox]::Show($err2, "Files Not Found in Source Directory $dirToPluginBin", $buttons, $icon)
         exit
@@ -58,6 +58,18 @@ function CheckSrcFilesExist {
     }
 }
 
+function CompareAndMove {
+    if (-not (Get-Item $sdPluginQt6Dest).VersionInfo.FileVersion -lt $sdPluginQt6Source) {
+        [System.Windows.MessageBox]::Show($err3, "$sdPluginDllQt6Fn Move Not Required", $buttons, $icon)
+    } else {
+    Move-Item -Path $dirToPluginBin\* -Destination $dirToObsBin -Force
+    }
+        if (-not (Get-Item $sdPluginDest).VersionInfo.FileVersion -lt $sdPluginMainSource) {
+        [System.Windows.MessageBox]::Show($err4, "$sdPluginMainDll Move Not Required", $buttons, $icon)
+    } else {
+      Move-Item -Path $dirToPluginData\* -Destination $dirToObsData -Force
+    }
+}
 
 if (-not (Test-Path -Path $dirToObsBin)) {
     New-Item -ItemType Directory -Path $dirToObsData | Out-Null
@@ -67,28 +79,20 @@ elseif (-not (Test-Path -Path $sdPluginQt6Source)) {
     Break
 }
 else {
-    if (-not (Get-Item $sdPluginDest).VersionInfo.FileVersion -lt $sdPluginMainSource) {
-        [System.Windows.MessageBox]::Show($err4, "$sdPluginMainDll Move Not Required", $buttons, $icon)
-        Break
-    }
+
     else {
-        Move-Item -Path $dirToPluginBin\* -Destination $dirToObsBin -Force
+        
     }
 }
 
-if (-not (Test-Path -Path $dirToObsData)) {
-    New-Item -ItemType Directory -Path $dirToObsData | Out-Null
-    Write-Host "Directory created as it did not exist: $dirToObsData"
-}
+
 elseif (-not (Test-Path -Path $sdPluginQt6Source)) {
     [System.Windows.MessageBox]::Show("Could not find $sdPluginMainDll in $sdPluginMainSource.`r`n`r`n$checkSWInstall", "$sdPluginMainDll Source File Not Found", $buttons, $icon)
     Break
 }
 else {
-    if (-not (Get-Item $sdPluginQt6Dest).VersionInfo.FileVersion -lt $sdPluginQt6Source) {
-        [System.Windows.MessageBox]::Show($err3, "$sdPluginDllQt6Fn Move Not Required", $buttons, $icon)
-    }
+
     else {
-        Move-Item -Path $dirToPluginData\* -Destination $dirToObsData -Force
+      
     }
 }
